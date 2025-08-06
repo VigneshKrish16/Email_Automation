@@ -1,0 +1,9 @@
+flask
+flask-cors
+imapclient
+email-validator
+smtplib
+langchain
+langchain-core
+langchain-ollama
+asyncio

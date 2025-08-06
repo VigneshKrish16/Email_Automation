@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Client</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- Introduction Page -->
+    <div class="intro-page" id="introPage">
+        <div class="intro-content">
+            <div class="intro-title">Welcome to Email Client</div>
+            <div class="intro-description">Empower your email communication effortlessly generate, edit, and send smart responses with our AI-powered email assistant.</div>
+            <div class="intro-image">
+                <img src="{{ url_for('static', filename='img1.png') }}" alt="Email Icon">
+            </div>
+            <div class="intro-continue">Click anywhere to continue...</div>
+        </div>
+    </div>
+
+    <!-- Email Provider Selection Modal -->
+    <div class="modal" id="providerModal">
+        <h3>Select Email Provider</h3>
+        <button class="modal-button" onclick="selectProvider('gmail')">Gmail</button>
+        <button class="modal-button" onclick="selectProvider('outlook')">Outlook</button>
+    </div>
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+    <!-- Gmail Login Modal -->
+    <div class="modal" id="gmailLoginModal">
+        <h3>Gmail Login</h3>
+        <form id="gmailLoginForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">App Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="login-button">Login</button>
+            </div>
+            <p class="error-message" id="loginError"></p>
+        </form>
+    </div>
+    <div class="modal-overlay" id="loginModalOverlay"></div>
+
+    <!-- Outlook Email Modal -->
+    <div class="modal" id="outlookEmailModal">
+        <h3>Outlook Configuration</h3>
+        <form id="outlookEmailForm">
+            <div class="form-group">
+                <label for="outlookEmail">Your Outlook Email Address</label>
+                <input type="email" id="outlookEmail" name="outlookEmail" required>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="login-button">Continue</button>
+            </div>
+            <p class="error-message" id="outlookEmailError"></p>
+        </form>
+    </div>
+    <div class="modal-overlay" id="outlookEmailModalOverlay"></div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="menu-icon" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
+        <div class="logo" onclick="logout()">Email Client</div>
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" class="search-input" placeholder="Search in mail" oninput="handleSearchInput()">
+            <i class="fas fa-times cancel-button" onclick="clearSearch()" style="display: none;"></i>
+        </div>
+        <div style="margin-left: auto; padding-right: 20px;">
+            <i class="fas fa-sync-alt" style="margin: 0 16px; cursor: pointer;" title="Refresh" onclick="refreshDashboard()"></i>
+            <i class="fas fa-sign-out-alt" style="margin: 0 16px; cursor: pointer;" title="Logout" onclick="logout()"></i>
+        </div>
+    </div>
+
+    <!-- Container and Sidebar -->
+    <div class="container">
+        <div class="sidebar">
+            <ul class="folder-list">
+                <li class="folder-item active" onclick="navigateTo('inbox')"><i class="fas fa-inbox"></i> Inbox</li>
+                <li class="folder-item" onclick="navigateTo('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <!-- Inbox Content -->
+            <div id="emailList" style="display: block;"></div>
+
+            <!-- Dashboard Content -->
+            <div id="dashboardContent" style="display: none;">
+                <h2>Email Response Dashboard</h2>
+
+                <!-- Grid Layout for Charts -->
+                <div class="chart-grid">
+                    <div class="dashboard-section">
+                        <h3>Response Time Analysis</h3>
+                        <canvas id="responseTimeChart"></canvas>
+                    </div>
+                    <div class="dashboard-section">
+                        <h3>Predictive Response Probability</h3>
+                        <canvas id="responseProbabilityChart"></canvas>
+                    </div>
+                    <div class="dashboard-section">
+                        <h3>Delivery and Bounce Report</h3>
+                        <canvas id="deliveryBounceChart"></canvas>
+                    </div>
+                    <div class="dashboard-section">
+                        <h3>A/B Test Performance</h3>
+                        <canvas id="abTestChart"></canvas>
+                    </div>
+                    <div class="dashboard-section">
+                        <h3>Engagement Decay Report</h3>
+                        <canvas id="engagementDecayChart"></canvas>
+                    </div>
+                    <div class="dashboard-section">
+                        <h3>Audience Segmentation</h3>
+                        <canvas id="audienceSegmentationChart"></canvas>
+                    </div>
+                    <div class="dashboard-section">
+                        <h3>Content Performance</h3>
+                        <canvas id="contentPerformanceChart"></canvas>
+                    </div>
+                    <div class="dashboard-section">
+                        <h3>Sentiment & Intent Analysis</h3>
+                        <canvas id="sentimentAnalysisChart"></canvas>
+                    </div>
+                    <div class="dashboard-section">
+                        <h3>Optimization & Improvement Report</h3>
+                        <canvas id="optimizationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email and Response Split Layout -->
+    <div class="split-layout" id="splitLayout">
+        <div class="email-detail" id="emailDetail">
+            <!-- Email content will be displayed here -->
+        </div>
+        <div class="response-section" id="responseSection">
+            <div id="responseContent">
+                <!-- Generated response will be displayed here -->
+            </div>
+            <div class="response-actions">
+                <button onclick="sendResponse()">Send Response</button>
+                <span id="sentIndicator" class="sent-indicator" style="display: none;">✔️</span>
+                <button onclick="closeResponse()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        function navigateTo(page) {
+            if (page === 'inbox') {
+                document.getElementById('emailList').style.display = 'block';
+                document.getElementById('dashboardContent').style.display = 'none';
+                document.querySelector('.folder-list li:nth-child(1)').classList.add('active');
+                document.querySelector('.folder-list li:nth-child(2)').classList.remove('active');
+            } else if (page === 'dashboard') {
+                document.getElementById('emailList').style.display = 'none';
+                document.getElementById('dashboardContent').style.display = 'block';
+                document.querySelector('.folder-list li:nth-child(1)').classList.remove('active');
+                document.querySelector('.folder-list li:nth-child(2)').classList.add('active');
+
+                // Load dashboard data
+                loadDashboardData();
+            }
+        }
+
+        function loadDashboardData() {
+            fetch('/dashboard-data')
+                .then(response => response.json())
+                .then(data => {
+                    renderCharts(data);
+                })
+                .catch(error => {
+                    console.error('Error loading dashboard data:', error);
+                });
+        }
+
+        function refreshDashboard() {
+            loadDashboardData();
+        }
+    </script>
+</body>
+</html>
